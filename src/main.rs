@@ -1,8 +1,10 @@
+use anyhow::{bail, Result};
 use clap::{App, Arg};
 use std::collections::HashMap;
 use std::fs::File;
+use std::io::{BufRead, BufReader};
 
-fn main() {
+fn main() -> Result<()> {
     let matches = App::new(clap::crate_name!())
         .author(clap::crate_authors!())
         .version(clap::crate_version!())
@@ -23,4 +25,32 @@ fn main() {
 
     let package_name = matches.value_of("PACKAGE").unwrap();
     let proxy = matches.value_of("PROXY").unwrap();
+
+    let packages = parse_packages_list()?;
+
+    if let Some(v) = packages.get(package_name) {
+        println!("{}", v);
+    } else {
+        bail!("Package {} not installed on device.", package_name);
+    }
+
+    Ok(())
+}
+
+fn parse_packages_list() -> Result<HashMap<String, String>> {
+    let file = File::open("packages.list")?;
+
+    let mut map = HashMap::new();
+
+    for line in BufReader::new(file).lines() {
+        let line = line?;
+        let mut l = line.split_ascii_whitespace();
+
+        let package_name = l.next().unwrap().to_string();
+        let package_uid = l.next().unwrap().to_string();
+
+        map.insert(package_name, package_uid);
+    }
+
+    Ok(map)
 }
