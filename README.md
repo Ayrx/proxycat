@@ -35,7 +35,7 @@ This subcommand is used to add a new `iptables` rule and requires the package
 name and proxy address as arguments.
 
 ```
-➜  proxycat git:(master) ✗ ./proxycat add --help
+➜ ./proxycat add --help
 proxycat-add
 Add proxy rule.
 
@@ -73,14 +73,14 @@ proxy address. To view the inserted rules, run `iptables -t nat -L` on device.
 `proxycat` can be compiled into a static binary with the following command:
 
 ```
-cargo build --target x86_64-unknown-linux-musl --release
+➜ cargo build --target x86_64-unknown-linux-musl --release
 ```
 
 If a binary for another architecture is required, `proxycat` can be
 cross-compiled using [cross][cross].
 
 ```
-cross build --target arm-unknown-linux-musleabi --release
+➜ cross build --target arm-unknown-linux-musleabi --release
 ```
 
 [cross]: https://github.com/rust-embedded/cross
