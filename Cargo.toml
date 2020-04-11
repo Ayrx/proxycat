@@ -9,3 +9,8 @@ edition = "2018"
 [dependencies]
 clap = "2.33.0"
 anyhow = "1.0.28"
+
+[profile.release]
+opt-level = 'z' # Optimize for size.
+lto = true
+codegen-units = 1
