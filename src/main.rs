@@ -27,10 +27,15 @@ fn main() -> Result<()> {
                         .index(2),
                 ),
         )
+        .subcommand(SubCommand::with_name("clean").about("Remove iptable NAT rules."))
         .get_matches();
 
     if let Some(matches) = matches.subcommand_matches("add") {
         add(matches)?;
+    }
+
+    if let Some(_) = matches.subcommand_matches("clean") {
+        clean()?;
     }
 
     Ok(())
@@ -47,6 +52,14 @@ fn add(matches: &clap::ArgMatches) -> Result<()> {
     } else {
         bail!("Package {} not installed on device.", package_name);
     }
+
+    Ok(())
+}
+
+fn clean() -> Result<()> {
+    Command::new("iptables")
+        .args(&["-t", "nat", "-F"])
+        .status()?;
 
     Ok(())
 }
