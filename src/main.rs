@@ -3,6 +3,7 @@ use clap::{App, Arg};
 use std::collections::HashMap;
 use std::fs::File;
 use std::io::{BufRead, BufReader};
+use std::process::Command;
 
 fn main() -> Result<()> {
     let matches = App::new(clap::crate_name!())
@@ -29,7 +30,7 @@ fn main() -> Result<()> {
     let packages = parse_packages_list()?;
 
     if let Some(v) = packages.get(package_name) {
-        println!("{}", v);
+        insert_iptable_rule(v, proxy)?;
     } else {
         bail!("Package {} not installed on device.", package_name);
     }
@@ -53,4 +54,27 @@ fn parse_packages_list() -> Result<HashMap<String, String>> {
     }
 
     Ok(map)
+}
+
+fn insert_iptable_rule(uid: &str, proxy: &str) -> Result<()> {
+    Command::new("iptables")
+        .args(&[
+            "-t",
+            "nat",
+            "-A",
+            "OUTPUT",
+            "-m",
+            "owner",
+            "--uid-owner",
+            uid,
+            "-p",
+            "tcp",
+            "-j",
+            "DNAT",
+            "--to-destination",
+            proxy,
+        ])
+        .status()?;
+
+    Ok(())
 }
