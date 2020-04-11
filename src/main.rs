@@ -38,7 +38,7 @@ fn main() -> Result<()> {
 }
 
 fn parse_packages_list() -> Result<HashMap<String, String>> {
-    let file = File::open("packages.list")?;
+    let file = File::open("/data/system/packages.list")?;
 
     let mut map = HashMap::new();
 
