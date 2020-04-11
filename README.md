@@ -66,7 +66,7 @@ UID is stored in the `/data/system/packages.list` file which is parsed by
 `proxycat`.
 
 `nat` rules are then added to transparently proxy traffic to the specified
-proxy address.
+proxy address. To view the inserted rules, run `iptables -t nat -L` on device.
 
 ## Building
 
