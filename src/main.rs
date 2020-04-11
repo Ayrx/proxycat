@@ -1,5 +1,5 @@
 use anyhow::{bail, Result};
-use clap::{App, Arg};
+use clap::{App, AppSettings, Arg, SubCommand};
 use std::collections::HashMap;
 use std::fs::File;
 use std::io::{BufRead, BufReader};
@@ -10,20 +10,33 @@ fn main() -> Result<()> {
         .author(clap::crate_authors!())
         .version(clap::crate_version!())
         .about(clap::crate_description!())
-        .arg(
-            Arg::with_name("PACKAGE")
-                .help("Android app to proxy.")
-                .required(true)
-                .index(1),
-        )
-        .arg(
-            Arg::with_name("PROXY")
-                .help("Proxy address to use.")
-                .required(true)
-                .index(2),
+        .setting(AppSettings::ArgRequiredElseHelp)
+        .subcommand(
+            SubCommand::with_name("add")
+                .about("Add proxy rule.")
+                .arg(
+                    Arg::with_name("PACKAGE")
+                        .help("Android app to proxy.")
+                        .required(true)
+                        .index(1),
+                )
+                .arg(
+                    Arg::with_name("PROXY")
+                        .help("Proxy address to use.")
+                        .required(true)
+                        .index(2),
+                ),
         )
         .get_matches();
 
+    if let Some(matches) = matches.subcommand_matches("add") {
+        add(matches)?;
+    }
+
+    Ok(())
+}
+
+fn add(matches: &clap::ArgMatches) -> Result<()> {
     let package_name = matches.value_of("PACKAGE").unwrap();
     let proxy = matches.value_of("PROXY").unwrap();
 
