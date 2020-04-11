@@ -3,6 +3,11 @@
 `proxycat` makes it easy to transparently proxy a specific application's TCP
 traffic.
 
+`proxycat` is a largely a wrapper around `iptables` and has to be run on an
+Android device with root privileges. `proxycat` does not take into
+consideration existing iptables rules on the device and might conflict with or
+clobber existing rules. Use with caution.
+
 ## Usage
 
 ```
