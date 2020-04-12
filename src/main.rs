@@ -3,7 +3,7 @@ use clap::{App, AppSettings, Arg, SubCommand};
 use std::collections::HashMap;
 use std::fs::File;
 use std::io::{BufRead, BufReader};
-use std::process::Command;
+use std::process::{Command, Stdio};
 
 fn main() -> Result<()> {
     let matches = App::new(clap::crate_name!())
@@ -48,6 +48,7 @@ fn add(matches: &clap::ArgMatches) -> Result<()> {
     let packages = parse_packages_list()?;
 
     if let Some(v) = packages.get(package_name) {
+        setup_proxycat_chain()?;
         insert_iptable_rule(v, proxy)?;
     } else {
         bail!("Package {} not installed on device.", package_name);
@@ -57,9 +58,25 @@ fn add(matches: &clap::ArgMatches) -> Result<()> {
 }
 
 fn clean() -> Result<()> {
-    Command::new("iptables")
-        .args(&["-t", "nat", "-F"])
+    let status = Command::new("iptables")
+        .stdout(Stdio::null())
+        .stderr(Stdio::null())
+        .args(&["-t", "nat", "-n", "-L", "PROXYCAT"])
         .status()?;
+
+    if status.success() {
+        Command::new("iptables")
+            .args(&["-t", "nat", "-F", "PROXYCAT"])
+            .status()?;
+
+        Command::new("iptables")
+            .args(&["-t", "nat", "-D", "OUTPUT", "-j", "PROXYCAT"])
+            .status()?;
+
+        Command::new("iptables")
+            .args(&["-t", "nat", "-X", "PROXYCAT"])
+            .status()?;
+    }
 
     Ok(())
 }
@@ -82,13 +99,33 @@ fn parse_packages_list() -> Result<HashMap<String, String>> {
     Ok(map)
 }
 
+fn setup_proxycat_chain() -> Result<()> {
+    let status = Command::new("iptables")
+        .stdout(Stdio::null())
+        .stderr(Stdio::null())
+        .args(&["-t", "nat", "-n", "-L", "PROXYCAT"])
+        .status()?;
+
+    if !status.success() {
+        Command::new("iptables")
+            .args(&["-t", "nat", "-N", "PROXYCAT"])
+            .status()?;
+
+        Command::new("iptables")
+            .args(&["-t", "nat", "-I", "OUTPUT", "-j", "PROXYCAT"])
+            .status()?;
+    }
+
+    Ok(())
+}
+
 fn insert_iptable_rule(uid: &str, proxy: &str) -> Result<()> {
     Command::new("iptables")
         .args(&[
             "-t",
             "nat",
             "-A",
-            "OUTPUT",
+            "PROXYCAT",
             "-m",
             "owner",
             "--uid-owner",
