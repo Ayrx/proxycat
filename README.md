@@ -1,12 +1,15 @@
 # proxycat
 
-`proxycat` makes it easy to transparently proxy a specific application's TCP
-traffic.
+`proxycat` makes it easy to transparently proxy a specific Android
+application's TCP traffic.
 
 `proxycat` is a largely a wrapper around `iptables` and has to be run on an
 Android device with root privileges. `proxycat` does not take into
 consideration existing iptables rules on the device and might conflict with or
 clobber existing rules. Use with caution.
+
+`iptables` rules are inserted into the `PROXYCAT` chain in the `nat` table.
+Run `iptables -t nat -L` on the Android device to view the inserted rules.
 
 ## Usage
 
@@ -66,7 +69,7 @@ UID is stored in the `/data/system/packages.list` file which is parsed by
 `proxycat`.
 
 `nat` rules are then added to transparently proxy traffic to the specified
-proxy address. To view the inserted rules, run `iptables -t nat -L` on device.
+proxy address.
 
 ## Building
 
