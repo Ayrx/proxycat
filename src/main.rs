@@ -34,7 +34,7 @@ fn main() -> Result<()> {
         add(matches)?;
     }
 
-    if let Some(_) = matches.subcommand_matches("clean") {
+    if matches.subcommand_matches("clean").is_some() {
         clean()?;
     }
 
