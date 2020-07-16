@@ -1,0 +1,50 @@
+name: Upload to release
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  build_x86:
+    name: Upload x86_64
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+      - uses: actions-rs/cargo@v1
+        with:
+          use-cross: true
+          command: build
+          args: --release --target x86_64-unknown-linux-musl
+      - uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: target/x86_64-unknown-linux-musl/release/proxycat
+          asset_name: proxycat_x86_64
+          asset_content_type: application/octet-stream
+
+  build_arm:
+    name: Upload ARM
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+      - uses: actions-rs/cargo@v1
+        with:
+          use-cross: true
+          command: build
+          args: --release --target arm-unknown-linux-musleabi
+      - uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: target/arm-unknown-linux-musleabi/release/proxycat
+          asset_name: proxycat_armv6
+          asset_content_type: application/octet-stream
